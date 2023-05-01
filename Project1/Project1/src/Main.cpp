@@ -1,40 +1,26 @@
 #include <iostream> 
-#include <iostream>
+extern int s_Variable; // Declaration of s_Variable
 
-#define LOG(x) std::cout << x << std::endl
-
-void Increment(int value)
+struct Entity
 {
-	// int value = 5; 
-	value++;
-}
+	static int x, y;
+	static void Print() { std::cout << x << ", " << y << std::endl; }
+};
 
-void Increment2(int* value)
-{
-	(*value)++;
-}
-
-// just a syntax suger, look nicer simpler to read
-// there is nothing you can don with reference that you can't do with pointers
-void Increment3(int& value)
-{
-	value++;
-}
+// Definition of static variables
+int Entity::x;
+int Entity::y;
 
 int main()
 {
-	int a = 5;
-	// int& ref; // error: a reference must be initialized
-	int& ref = a;
-	ref = 2;
-	Increment(a);
+	Entity e;
+	e.x = 2;
+	e.y = 3;
 
-	int b = 8; 
-	ref = b; // cannot change reference, just copys the value
-	
-	// a = 8, b = 8
+	Entity e1;
+	e1.x = 5; // Entity::x = 5;
+	e1.y = 8; // Entity::y = 8;
 
-	LOG(a);
-
+	std::cout << s_Variable << std::endl;
 	std::cin.get();
 }
