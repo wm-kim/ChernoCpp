@@ -3,19 +3,38 @@
 
 #define LOG(x) std::cout << x << std::endl
 
+void Increment(int value)
+{
+	// int value = 5; 
+	value++;
+}
+
+void Increment2(int* value)
+{
+	(*value)++;
+}
+
+// just a syntax suger, look nicer simpler to read
+// there is nothing you can don with reference that you can't do with pointers
+void Increment3(int& value)
+{
+	value++;
+}
+
 int main()
 {
-	int var = 7;
-	// data at that address is presumed to be type of we given, doesn't mean anything
-	// void* ptr = nullptr;
-	// void *ptr = NULL; #define NULL 0
-	void* ptr = &var;
-	*ptr = 10; // don't know how to write the data
+	int a = 5;
+	// int& ref; // error: a reference must be initialized
+	int& ref = a;
+	ref = 2;
+	Increment(a);
 
-	// create a variable on a heap
-	char* buffer = new char[8];
-	memset(buffer, 0, 8);
+	int b = 8; 
+	ref = b; // cannot change reference, just copys the value
+	
+	// a = 8, b = 8
 
-	delete[] buffer;
+	LOG(a);
+
 	std::cin.get();
 }
