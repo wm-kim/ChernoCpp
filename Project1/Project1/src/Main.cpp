@@ -1,32 +1,61 @@
 #include <iostream> 
-#include <string>
 
-struct Entity 
+class Entity
 {
 public:
-	virtual std::string GetName() = 0;
+	int* example = new int[5];
+	
+	Entity()
+	{
+		// there is no way to know size of the array in heap, but in stack you can know the size
+		// example->size(); 
+		for (int i = 0; i < 5; i++)
+			example[i] = 2;
+
+		int a[5];
+		int count = sizeof(a) / sizeof(int);
+	}
 };
 
-class Player : public Entity
+class Entity2
 {
-private:
-	std::string m_Name;
 public:
-	Player(const std::string& name)
-		: m_Name(name) {}
+	// const int size = 5;
+	// int example[size]; should be compile time known constant
 
-	std::string GetName() override { return m_Name; }
+	// const expression have to be static 
+	// static constexpr int size = 5;
+	
+	static const int size = 5;
+	int example[size];
+
+	Entity2()
+	{
+		for (int i = 0; i < size; i++)
+			example[i] = 2;
+	}
+}; 
+
+// C++11, consider using this 
+#include <array>
+
+class Entity3
+{
+public:
+	std::array<int, 5> example;
+
+	Entity3()
+	{
+		for (int i = 0; i < example.size(); i++)
+			example[i] = 2;
+	}
 };
 
 int main()
 {
-	// Don't have ability to create an instance of Entity
-	// Entity* e = new Entity();
+	int example[5];             // created on stack, destroy when out of scope
+	int* another = new int[5];  // created on heap, destroy when delete is called or program ends
 
-	// should implement all the pure virtual functions 
-	// in order to be able to create an instance of the class
-
-	// interface in c++ is just class with pure virtual function in c++
-	
+	delete[] another;           
 	std::cin.get();
 }
