@@ -1,26 +1,32 @@
 #include <iostream> 
-extern int s_Variable; // Declaration of s_Variable
+#include <string>
 
-struct Entity
+struct Entity 
 {
-	static int x, y;
-	static void Print() { std::cout << x << ", " << y << std::endl; }
+public:
+	virtual std::string GetName() = 0;
 };
 
-// Definition of static variables
-int Entity::x;
-int Entity::y;
+class Player : public Entity
+{
+private:
+	std::string m_Name;
+public:
+	Player(const std::string& name)
+		: m_Name(name) {}
+
+	std::string GetName() override { return m_Name; }
+};
 
 int main()
 {
-	Entity e;
-	e.x = 2;
-	e.y = 3;
+	// Don't have ability to create an instance of Entity
+	// Entity* e = new Entity();
 
-	Entity e1;
-	e1.x = 5; // Entity::x = 5;
-	e1.y = 8; // Entity::y = 8;
+	// should implement all the pure virtual functions 
+	// in order to be able to create an instance of the class
 
-	std::cout << s_Variable << std::endl;
+	// interface in c++ is just class with pure virtual function in c++
+	
 	std::cin.get();
 }
