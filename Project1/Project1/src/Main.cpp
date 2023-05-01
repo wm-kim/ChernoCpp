@@ -1,61 +1,49 @@
 #include <iostream> 
+#include <string>
 
-class Entity
+
+// don't do this, create copy of this class
+// copy a string is dynamic heap allocation, string copy is slow
+void PrintString(std::string string)
 {
-public:
-	int* example = new int[5];
-	
-	Entity()
-	{
-		// there is no way to know size of the array in heap, but in stack you can know the size
-		// example->size(); 
-		for (int i = 0; i < 5; i++)
-			example[i] = 2;
+	std::cout << string << std::endl;
+}
 
-		int a[5];
-		int count = sizeof(a) / sizeof(int);
-	}
-};
-
-class Entity2
+// pass by reference, no copy
+void PrintStringRef(const std::string& string)
 {
-public:
-	// const int size = 5;
-	// int example[size]; should be compile time known constant
-
-	// const expression have to be static 
-	// static constexpr int size = 5;
-	
-	static const int size = 5;
-	int example[size];
-
-	Entity2()
-	{
-		for (int i = 0; i < size; i++)
-			example[i] = 2;
-	}
-}; 
-
-// C++11, consider using this 
-#include <array>
-
-class Entity3
-{
-public:
-	std::array<int, 5> example;
-
-	Entity3()
-	{
-		for (int i = 0; i < example.size(); i++)
-			example[i] = 2;
-	}
-};
+	std::cout << string << std::endl;
+}
 
 int main()
 {
-	int example[5];             // created on stack, destroy when out of scope
-	int* another = new int[5];  // created on heap, destroy when delete is called or program ends
+	// how to know its size?, string ends with 0
+	const char* name = "hello";
+	const char name2[6] = { 'h', 'e', 'l', 'l', 'o', 0 }; // 0 or '\0' is the null terminator
+	std::string name3 = "hello"; // + "world"; error
+	std::string name4 = std::string("hello") + "world"; // ok
+	name3 += "world";
 
-	delete[] another;           
-	std::cin.get();
+	// there is no .contains in c++ string
+	bool contains = name3.find("ll") != std::string::npos;
+	
+	// this is wrong, string literals are always stored in readonly memory
+	// char* name5 = "Cherno";
+	// in c++11 const char* is possible
+	
+	const wchar_t* name6 = L"Cherno"; // wide char, 2 bytes
+	const char16_t* name7 = u"Cherno"; // 2 bytes
+	const char32_t* name8 = U"Cherno"; // 4 bytes
+
+	std::cout << name3 << std::endl;
+
+	// c++14 
+	using namespace std::string_literals;
+	std::string name9 = "Cherno"s + " hello!";
+	std::wstring name10 = L"Cherno"s + L" hello!";
+	std::u32string name11 = U"Cherno"s + U" hello!";
+
+	const char* example = R"(Line1
+Line2
+Line3)";
 }
