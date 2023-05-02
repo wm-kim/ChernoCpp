@@ -1,42 +1,59 @@
 #include <iostream> 
 #include <string>
 
-using String = std::string;
+// using operator overloading 
+// ex. Add -> +
+// use & to push the variable into dataset
 
-class Entity
+struct Vector2
 {
-private:
-	String m_Name;
-	int m_Age;
-public:
-	Entity(const String& name) : m_Name(name), m_Age(-1) {}
-	explicit Entity(int age) : m_Name("Unknown"), m_Age(age) {}
+	float x, y;
+	Vector2(float x, float y) : x(x), y(y) {}
+	Vector2 Add(const Vector2& other) const
+	{
+		// code styles
+		return Vector2(x + other.x, y + other.y);
+		// return *this + other;
+		// return operator+(other);
+	}
+
+	Vector2 Multiply(const Vector2& other) const
+	{
+		return Vector2(x * other.x, y * other.y);
+	}
+
+	Vector2 operator+(const Vector2& other) const
+	{
+		return Add(other);
+	}
+
+	Vector2 operator*(const Vector2& other) const
+	{
+		return Multiply(other);
+	}
+
+	bool operator==(const Vector2& other) const
+	{
+		return x == other.x && y == other.y;
+	}
 };
 
-void PrintEntity(const Entity& entity)
+std::ostream& operator<<(std::ostream& stream, const Vector2& other)
 {
-	// print entity
+	stream << other.x << ", " << other.y;
+	return stream;
 }
 
 int main()
 {
-	PrintEntity(22);
-	
-	// "Cherno" is const char array. c++ has to do two conversion
-	// 1. const char array -> string.
-	// 2. string into Entity
-	// Only allow to do one implicit conversion
-	PrintEntity(std::string("Cherno"));
-	PrintEntity(Entity("Cherno"));
+	Vector2 position = { 4.0f, 4.0f };
+	Vector2 speed = { 0.5f, 1.5f };
+	Vector2 powerup = { 1.1f, 1.1f };
 
-	// Entity a = "Cherno"; error
-	Entity a = std::string("Cherno");
-	
-	// Explicit keyword is used in constructor to prevent implicit conversion 
-	Entity b = 22; // error
-	Entity b(22);
-	Entity b = (Entity)22; 
-	Entity b = Entity(22);
+	Vector2 result = position.Add(speed);	
+	Vector2 result2 = position + speed * powerup;
+
+	std::cout << result << std::endl;
 	
 	std::cin.get();
 }
