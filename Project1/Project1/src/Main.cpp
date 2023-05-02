@@ -2,82 +2,65 @@
 #include <string>
 #include <memory>
 
-// Scoped Pointer : wrapper over pointer, heap allocate pointer and automate delete thing
-// ex. mutex locking - automatic scoped lock
-
-
-// unique pointer is scoped pointer, can't copy
-
-
-class Entity
-{
-public:
-	Entity()
-	{
-		std::cout << "Created Entity!" << std::endl;
-	}
-
-	~Entity()
-	{
-		std::cout << "Destroyed Entity!" << std::endl;
-	}
-	
-	void Print() {}
-};
-
-class ScopedPtr
+class String
 {
 private:
-	Entity* m_Ptr;
+	char* m_Buffer;
+	unsigned int m_Size;
 public:
-	ScopedPtr(Entity* ptr)
-		: m_Ptr(ptr)
+	String(const char* string)
 	{
+		m_Size = strlen(string);
+		m_Buffer = new char[m_Size + 1];
+		memcpy(m_Buffer, string, m_Size);
+		m_Buffer[m_Size] = 0;
 	}
 
-	~ScopedPtr()
+	~String()
 	{
-		delete m_Ptr;
+		delete[] m_Buffer;
 	}
+
+	char& operator[](unsigned int index)
+	{
+		return m_Buffer[index];
+	}
+
+	//String(const String& other) : m_Buffer(other.m_Buffer), m_Size(other.m_Size) {}
+	// or { memcpy(this, &other, sizeof(String)); }
+
+	String(const String& other) : m_Size(other.m_Size)
+	{
+		std::cout << "Copied String!" << std::endl;
+		m_Buffer = new char[m_Size + 1];
+		memcpy(m_Buffer, other.m_Buffer, m_Size + 1);
+	}
+	
+	friend std::ostream& operator<<(std::ostream& stream, const String& string);
 };
+
+std::ostream& operator<<(std::ostream& stream, const String& string)
+{
+	stream << string.m_Buffer;
+	return stream;
+}
+
+// ** Always pass object by const reference ** 
+void PrintString(const String& string)
+{
+	// if not const, we can do string[2] = 'a';
+	std::cout << string << std::endl;
+}
 
 int main()
 {
-	{
-		ScopedPtr e = new Entity(); // implicit conversion
-	} // e is destroyed here
+	String string = "Cherno";
+	String second = string; // Shallow copy
 
-	{
-		std::unique_ptr<Entity> entity(new Entity()); // constructor is explicit
-		
-		// slightly safer if destructor throw exception and end up having dangling pointer (memory leak)
-		std::unique_ptr<Entity> entity2 = std::make_unique<Entity>();  
-		std::unique_ptr<Entity> e0 = entity; // error, copy consturctor is deleted
-		entity->Print();
-	}
-
-	{
-		std::shared_ptr<Entity> e0;
-		{
-			// shared pointer - reference counting 
-			std::shared_ptr<Entity> sharedEntity = std::make_shared<Entity>();
-			// or new Entity(),this is fine
-			// because shared pointer has control block, which has reference count and pointer to object
-			// and when construct them together
-			e0 = sharedEntity;
-		}
-	} // if all the reference is gone, then it will be destroyed
-
-
-	// this is great if you don't want to take ownserhip of entity, it won't keep it alive
-	// can ask week pointer "are you still valid"
-	{
-		std::weak_ptr<Entity> weakEntity;
-		{
-			std::shared_ptr<Entity> sharedEntity = std::make_shared<Entity>();
-			weakEntity = sharedEntity;
-		} // weak pointer doesn't increase reference count, so it will be destroyed
-	} 
+	second[2] = 'a';
+	
+	std::cout << string << std::endl;
+	std::cout << second << std::endl; // this will crash because we are trying to delete the same memory twice
 
 	std::cin.get();
 }
