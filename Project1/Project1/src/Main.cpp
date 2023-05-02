@@ -1,43 +1,61 @@
 #include <iostream> 
 #include <string>
 
-class Entity
+// You should use member initialize list everywhere 
+
+class Example
 {
-private:
-	int m_X, m_Y;
-	// mutable allows you to modify a variable in a const function
-	mutable int var;
 public:
-	// const means that the function will not modify the class
-	int GetX() const
+	Example()
 	{
-		var = 2;
-		// m_X = 2; // This will not work because the function is const
-		return m_X;
+		std::cout << "Created Entity!" << std::endl;
+	}
+
+	Example(int x)
+	{
+		std::cout << "Created Entity with " << x << "!" << std::endl;
 	}
 };
 
-void PrintEntity(const Entity& e)
+class Entity
 {
-	// e = Entity(); // This will not work because the function is const
-	// if GetX was not const, this would not work either
-	// because it is not sure that GetX will not modify the class
-	std::cout << e.GetX() << std::endl;
-}
+private:
+	std::string m_Name;
+	int x, y, z;
+	Example m_Example;
+public:
+	/*Entity()
+	{
+		m_Name = "Unknown";
+	}*/
+
+	// Initalize list, should be in order of declaration
+	Entity() : m_Name("Unknown"), x(0), y(0), z(0) {}
+
+	Entity() : x(0), y(0), z(0) 
+	{
+		// not using initialize list, create two strings
+		m_Name = std::string("Unkown");
+		// created two entity
+		m_Example = Example(8);
+	}
+
+	Entity(const std::string& name)
+	{
+		m_Name = name;
+	}
+
+	const std::string& GetName() const { return m_Name; }
+};
+
 
 int main()
 {
-	const int MAX_AGE = 90;
-	const int* a = new int; // can't change content of the pointer
-	int const* c = new int; // can't change content of the pointer (same as above)
-	
-	int* const b = new int; // can't change the pointer
+	Entity e0;
+	std::cout << e0.GetName() << std::endl;
 
-	const int* const d = new int; // can't change the pointer or the content of the pointer
-	
-	// *a = 2;
-	a = (int*)&MAX_AGE;
-	std::cout << *a << std::endl;
+	Entity e1("Cherno");
+	std::cout << e1.GetName() << std::endl;
 
 	std::cin.get();
 }
