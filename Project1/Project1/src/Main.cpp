@@ -2,65 +2,67 @@
 #include <string>
 #include <memory>
 
-class String
+// why want to overload arrow operator and how to use it in custom classes
+// example
+
+class Entity
 {
-private:
-	char* m_Buffer;
-	unsigned int m_Size;
 public:
-	String(const char* string)
-	{
-		m_Size = strlen(string);
-		m_Buffer = new char[m_Size + 1];
-		memcpy(m_Buffer, string, m_Size);
-		m_Buffer[m_Size] = 0;
-	}
-
-	~String()
-	{
-		delete[] m_Buffer;
-	}
-
-	char& operator[](unsigned int index)
-	{
-		return m_Buffer[index];
-	}
-
-	//String(const String& other) : m_Buffer(other.m_Buffer), m_Size(other.m_Size) {}
-	// or { memcpy(this, &other, sizeof(String)); }
-
-	String(const String& other) : m_Size(other.m_Size)
-	{
-		std::cout << "Copied String!" << std::endl;
-		m_Buffer = new char[m_Size + 1];
-		memcpy(m_Buffer, other.m_Buffer, m_Size + 1);
-	}
-	
-	friend std::ostream& operator<<(std::ostream& stream, const String& string);
+	int x;
+public:
+	void Print() const { std::cout << "Hello!" << std::endl; }
 };
 
-std::ostream& operator<<(std::ostream& stream, const String& string)
+class ScopedPtr
 {
-	stream << string.m_Buffer;
-	return stream;
-}
+private:
+	Entity* m_Obj;
+public:
+	ScopedPtr(Entity* entity)
+		: m_Obj(entity)
+	{
+	}
 
-// ** Always pass object by const reference ** 
-void PrintString(const String& string)
+	~ScopedPtr()
+	{
+		delete m_Obj;
+	}
+
+	Entity* operator->()
+	{
+		return m_Obj;
+	}
+
+	const Entity* operator->() const
+	{
+		return m_Obj;
+	}
+};
+
+struct Vector3
 {
-	// if not const, we can do string[2] = 'a';
-	std::cout << string << std::endl;
-}
+	float x, y, z;
+	// float x, z, y; 
+	// how to tell the offset of each member in the struct
+};
 
 int main()
 {
-	String string = "Cherno";
-	String second = string; // Shallow copy
+	{
+		ScopedPtr entity = new Entity();
+		entity->Print();
+	}
 
-	second[2] = 'a';
+	{
+		// const version
+		const ScopedPtr entity = new Entity();
+		entity->Print();
+	}
+
+
+	// used arrow operator to get the member of the struct
+	int offset = (int)&((Vector3*)nullptr)->y; // 4
+	std::cout << offset << std::endl;
 	
-	std::cout << string << std::endl;
-	std::cout << second << std::endl; // this will crash because we are trying to delete the same memory twice
-
 	std::cin.get();
 }
