@@ -1,68 +1,51 @@
 #include <iostream> 
 #include <string>
 #include <memory>
+#include <vector>
 
-// why want to overload arrow operator and how to use it in custom classes
-// example
+// unlike std::array, std::vector can be resized
+// lot of studios create their own version of standard library make them more optimized and faster	
+// ex EA-STL (github usually more faster than standard library https://github.com/electronicarts/EASTL)
 
-class Entity
-{
-public:
-	int x;
-public:
-	void Print() const { std::cout << "Hello!" << std::endl; }
-};
-
-class ScopedPtr
-{
-private:
-	Entity* m_Obj;
-public:
-	ScopedPtr(Entity* entity)
-		: m_Obj(entity)
-	{
-	}
-
-	~ScopedPtr()
-	{
-		delete m_Obj;
-	}
-
-	Entity* operator->()
-	{
-		return m_Obj;
-	}
-
-	const Entity* operator->() const
-	{
-		return m_Obj;
-	}
-};
-
-struct Vector3
+struct Vertex
 {
 	float x, y, z;
-	// float x, z, y; 
-	// how to tell the offset of each member in the struct
 };
+
+std::ostream& operator<<(std::ostream& stream, const Vertex& vertex)
+{
+	stream << vertex.x << ", " << vertex.y << ", " << vertex.z;
+	return stream;
+}
+
+// Do remember passing by reference
+void Function(const std::vector<Vertex>& vertices)
+{
+
+}
 
 int main()
 {
-	{
-		ScopedPtr entity = new Entity();
-		entity->Print();
-	}
-
-	{
-		// const version
-		const ScopedPtr entity = new Entity();
-		entity->Print();
-	}
-
-
-	// used arrow operator to get the member of the struct
-	int offset = (int)&((Vector3*)nullptr)->y; // 4
-	std::cout << offset << std::endl;
+	// Vertex* vertices = new Vertex[5];
+	// 
+	// also can pass primitive types
+	// Its is hard to decide whether should using std::vector<Vertex*> or std::vector<Vertex>
+	// technically more optimal to store vertex instead of pointers, 
+	// but when it comes to resize the vector, it will copy the entire vector
+	std::vector<Vertex> vertices;
+	vertices.push_back({ 1, 2, 3 }); 
+	vertices.push_back({ 4, 5, 6 });
 	
+	vertices.erase(vertices.begin() + 1);
+	
+	for (int i = 0; i < vertices.size(); i++)
+		std::cout << vertices[i] << std::endl;
+
+	// range based for loop
+	for (Vertex& v : vertices)
+		std::cout << v << std::endl;
+	
+	vertices.clear();
+
 	std::cin.get();
 }
