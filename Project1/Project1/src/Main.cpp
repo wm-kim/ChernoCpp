@@ -7,51 +7,36 @@ class Entity
 {
 private:
 	String m_Name;
+	int m_Age;
 public:
-	Entity() : m_Name("Unknown") {}
-	Entity(const String& name) : m_Name(name) {}
-	
-	const String& GetName() const { return m_Name; }
+	Entity(const String& name) : m_Name(name), m_Age(-1) {}
+	explicit Entity(int age) : m_Name("Unknown"), m_Age(age) {}
 };
+
+void PrintEntity(const Entity& entity)
+{
+	// print entity
+}
 
 int main()
 {
-	Entity* e;
-	{
-		Entity entity; // called default constructor
-		e = &entity;
-		std::cout << entity.GetName() << std::endl;
-	}
-
-	{
-		// create on heap, now we are responsible for deleting it
-		Entity* entity = new Entity("Cherno"); 
-		e = entity;
-		std::cout << entity->GetName() << std::endl;
-	}
-
-	// If you can create object like this do it
-	// this is the fastest way in c++ to intantiate object
-	Entity entity2 = Entity("Cherno");
+	PrintEntity(22);
 	
+	// "Cherno" is const char array. c++ has to do two conversion
+	// 1. const char array -> string.
+	// 2. string into Entity
+	// Only allow to do one implicit conversion
+	PrintEntity(std::string("Cherno"));
+	PrintEntity(Entity("Cherno"));
 
-	{
-	    // when using new keyword 
-		// it allocates memory but also calls constructor 
-		e = new Entity();
-		// this is not calling constructor
-		Entity* e = (Entity*)malloc(sizeof(Entity)); 
-	}
-
-	// placement new : decide where the memory comes from 
-	// not really allocating memory just calling constructor and intialize Entity in a specific memory address
-	{
-		int a = 2;
-		int* b = new int[50];
-		
-		Entity* e = new(b) Entity();
-	}
+	// Entity a = "Cherno"; error
+	Entity a = std::string("Cherno");
+	
+	// Explicit keyword is used in constructor to prevent implicit conversion 
+	Entity b = 22; // error
+	Entity b(22);
+	Entity b = (Entity)22; 
+	Entity b = Entity(22);
 	
 	std::cin.get();
-	delete e;
 }
