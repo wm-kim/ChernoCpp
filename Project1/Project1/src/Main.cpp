@@ -3,49 +3,40 @@
 #include <memory>
 #include <vector>
 
-// unlike std::array, std::vector can be resized
-// lot of studios create their own version of standard library make them more optimized and faster	
-// ex EA-STL (github usually more faster than standard library https://github.com/electronicarts/EASTL)
-
+// Optimizing the usage of std::vector by avoiding unnecessary copies
 struct Vertex
 {
 	float x, y, z;
+
+	Vertex(float x, float y, float z)
+		: x(x), y(y), z(z)
+	{
+	}
+
+	Vertex(const Vertex& vertex)
+		: x(vertex.x), y(vertex.y), z(vertex.z)
+	{
+		std::cout << "Copied!" << std::endl;
+	}
 };
-
-std::ostream& operator<<(std::ostream& stream, const Vertex& vertex)
-{
-	stream << vertex.x << ", " << vertex.y << ", " << vertex.z;
-	return stream;
-}
-
-// Do remember passing by reference
-void Function(const std::vector<Vertex>& vertices)
-{
-
-}
 
 int main()
 {
-	// Vertex* vertices = new Vertex[5];
-	// 
-	// also can pass primitive types
-	// Its is hard to decide whether should using std::vector<Vertex*> or std::vector<Vertex>
-	// technically more optimal to store vertex instead of pointers, 
-	// but when it comes to resize the vector, it will copy the entire vector
-	std::vector<Vertex> vertices;
-	vertices.push_back({ 1, 2, 3 }); 
-	vertices.push_back({ 4, 5, 6 });
+	// if the vector has not enough space
+	// it will allocate more space and copy the old data to the new location
+	std::vector<Vertex> vertices; 
 	
-	vertices.erase(vertices.begin() + 1);
-	
-	for (int i = 0; i < vertices.size(); i++)
-		std::cout << vertices[i] << std::endl;
+	// reserve the space for the vector
+	vertices.reserve(3);
 
-	// range based for loop
-	for (Vertex& v : vertices)
-		std::cout << v << std::endl;
-	
-	vertices.clear();
+	vertices.push_back(Vertex(1, 2, 3));
+	vertices.push_back(Vertex(4, 5, 6));
+	vertices.push_back(Vertex(7, 8, 9));
+
+	// whould like to construct the vertex in the vector by using emplace_back
+	vertices.emplace_back(Vertex(1, 2, 3));
+	vertices.emplace_back(Vertex(4, 5, 6));
+	vertices.emplace_back(Vertex(7, 8, 9));
 
 	std::cin.get();
 }
