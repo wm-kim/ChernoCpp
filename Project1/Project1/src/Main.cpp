@@ -1,61 +1,57 @@
 #include <iostream> 
 #include <string>
 
-// You should use member initialize list everywhere 
-
-class Example
-{
-public:
-	Example()
-	{
-		std::cout << "Created Entity!" << std::endl;
-	}
-
-	Example(int x)
-	{
-		std::cout << "Created Entity with " << x << "!" << std::endl;
-	}
-};
+using String = std::string;
 
 class Entity
 {
 private:
-	std::string m_Name;
-	int x, y, z;
-	Example m_Example;
+	String m_Name;
 public:
-	/*Entity()
-	{
-		m_Name = "Unknown";
-	}*/
-
-	// Initalize list, should be in order of declaration
-	Entity() : m_Name("Unknown"), x(0), y(0), z(0) {}
-
-	Entity() : x(0), y(0), z(0) 
-	{
-		// not using initialize list, create two strings
-		m_Name = std::string("Unkown");
-		// created two entity
-		m_Example = Example(8);
-	}
-
-	Entity(const std::string& name)
-	{
-		m_Name = name;
-	}
-
-	const std::string& GetName() const { return m_Name; }
+	Entity() : m_Name("Unknown") {}
+	Entity(const String& name) : m_Name(name) {}
+	
+	const String& GetName() const { return m_Name; }
 };
-
 
 int main()
 {
-	Entity e0;
-	std::cout << e0.GetName() << std::endl;
+	Entity* e;
+	{
+		Entity entity; // called default constructor
+		e = &entity;
+		std::cout << entity.GetName() << std::endl;
+	}
 
-	Entity e1("Cherno");
-	std::cout << e1.GetName() << std::endl;
+	{
+		// create on heap, now we are responsible for deleting it
+		Entity* entity = new Entity("Cherno"); 
+		e = entity;
+		std::cout << entity->GetName() << std::endl;
+	}
 
+	// If you can create object like this do it
+	// this is the fastest way in c++ to intantiate object
+	Entity entity2 = Entity("Cherno");
+	
+
+	{
+	    // when using new keyword 
+		// it allocates memory but also calls constructor 
+		e = new Entity();
+		// this is not calling constructor
+		Entity* e = (Entity*)malloc(sizeof(Entity)); 
+	}
+
+	// placement new : decide where the memory comes from 
+	// not really allocating memory just calling constructor and intialize Entity in a specific memory address
+	{
+		int a = 2;
+		int* b = new int[50];
+		
+		Entity* e = new(b) Entity();
+	}
+	
 	std::cin.get();
+	delete e;
 }
