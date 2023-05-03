@@ -1,31 +1,45 @@
 #include <iostream>
 #include <array>
+#include <vector>
 
-void PrintArray(int* array, unsigned int size)
+// function pointer comes from C
+// function is just cpu instructions. somewhere in binary (executable file)
+// function pointer finds the address of the function in the binary
+
+void HelloWorld(int a)
 {
-	for (int i = 0; i < size; i++) {}
+	std::cout << "Hello World Value : " << a << std::endl;
 }
 
-void PrintArray(std::array<int, 5>& array)
+void PrintValue(int value)
 {
-	for (int i = 0; i < array.size(); i++) {}
-} 
+	std::cout << "Value : " << value << std::endl;
+}
+
+void Foreach(const std::vector<int>& values, void(*func)(int))
+{
+	for (int value : values)
+		func(value);
+}
 
 int main()
 {
-	// why you should use std::array instead of C-style arrays
-	// what is advantange?
-	std::array<int, 5> data; // stack
-	data[0] = 2;
-	data[4] = 1;
+	// this is confusing, so people tend to use auto or typedef 
+	// void(*function)() = HelloWorld;
+	typedef void(*HelloWorldFunction)(int);
+	
+	auto function = HelloWorld; // implicit convertion (& not needed)
+	HelloWorldFunction function2 = HelloWorld;
 
-	int dataOld[5]; // stack
-	dataOld[0] = 0;
+	function(8);
 
-	// can also use std algorithm with the class
-	// std::sort(data.begin(), data.end());
+	// example of why you use function pointer.
+	// tell function what to do
+	std::vector<int> values = { 1, 5, 4, 2 ,3 };
+	Foreach(values, PrintValue);
 
-	// and also in debug mode, and it would do bounds checking
+	// lambda
+	Foreach(values, [](int value) { std::cout << "Value : " << value << std::endl; });
 	
 	std::cin.get();
 }
