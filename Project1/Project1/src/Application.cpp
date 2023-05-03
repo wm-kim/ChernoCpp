@@ -1,35 +1,35 @@
 #include <iostream>
+#include <thread>
 
-// why don't use namespace std;
-// 1. want to know what I am using
-// 2. avoid possible errors in the future
-// don't use namespace in header file (never do that)
-// just use inside the function or small scope
 
-namespace apple {
-	// implicit conversion
-	void print(const std::string& text)
+// primary purpose of thread is optimization
+
+static bool s_Finished = false;
+
+void DoWork()
+{
+	using namespace std::literals::chrono_literals;
+
+	std::cout << "Started thread id=" << std::this_thread::get_id() << std::endl;
+
+	while (!s_Finished)
 	{
-		std::cout << text << std::endl;
+		std::cout << "Working...\n";
+		std::this_thread::sleep_for(1s);
 	}
 }
-
-namespace orange {
-	// don't require any kind of conversion
-	void print(const char* text)
-	{
-		std::string temp = text;
-		std::reverse(temp.begin(), temp.end());
-		std::cout << text << std::endl;
-	}
-}
-
-using namespace apple;
-using namespace orange;
 
 int main()
 {
-	print("Hello"); // olleh
+	std::thread worker(DoWork);
+
+	std::cin.get();
+	s_Finished = true;
+
+	// wait on current thread for worker thread to finish
+	worker.join();
+	std::cout << "Finished." << std::endl;
+	std::cout << "Started thread id=" << std::this_thread::get_id() << std::endl;
 
 	std::cin.get();
 }
