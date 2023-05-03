@@ -1,38 +1,35 @@
 #include <iostream>
 #include <string>
 
-// sort of meta-programming in c++ - this could get really complicated
-// for example generate entire meta langauge, don't abuse this
-// Templates are evaluated at compile time
-// extremely useful for logging system & material system (rendering graphics)
-template<typename T, int N>
-class Array
-{
-private:
-	T m_Array[N];
-public:
-	int GetSize() const { return N; }
-};
+// don't like overusing macros, its get very hard to read for the first time
 
-// Tmemplates in c++
-// get compiler write code for you, based on set of rules
+#define WAIT std::cin.get() // don't do this, don't use preprocesser this way
 
-template<typename T>
-void Print(T value)
-{
-	std::cout << value << std::endl;
-} 
+// or use in memory allocation in debug build to know how many bytes are allocated
+// from which file and which line. if you replace new keyword into custom keyword
 
-int main()
-{
-	// based on the type of the argument, compiler will generate a function
-	// if the Print function is not used, the compiler will not generate a function
-	Print(5);
-	Print("Hello");
-	Print(5.5f);
+#if 0
+// how to use marcro
+// #define PR_DEBUG 1
 
-	Array<std::string, 50> array;
-	std::cout << array.GetSize() << std::endl;
+#if PR_DEBUG == 1
+#define LOG(x) std::cout << x << std::endl
+#elif defined(PR_RELEASE)
+#define LOG(x) // will automatically remove this line
+#endif
 
-	std::cin.get();
+#endif
+
+// don't put space after backslash
+#define MAIN int main() \
+{\
+	std::cin.get(); \
 }
+//
+//int main()
+//{
+//	WAIT;
+//	LOG("Hello World");
+//}
+
+MAIN
