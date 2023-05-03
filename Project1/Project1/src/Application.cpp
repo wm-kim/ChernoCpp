@@ -1,73 +1,38 @@
+#include <iostream>
 #include <string>
-#include <sstream>
-#include <fstream>
-#include <array>
-#include <vector>
-#include <tuple>
 
-struct ShaderProgrammingSource
+// sort of meta-programming in c++ - this could get really complicated
+// for example generate entire meta langauge, don't abuse this
+// Templates are evaluated at compile time
+// extremely useful for logging system & material system (rendering graphics)
+template<typename T, int N>
+class Array
 {
-	std::string VertexSource;
-	std::string FragmentSource;
+private:
+	T m_Array[N];
+public:
+	int GetSize() const { return N; }
 };
 
-// this is one of the optimal ways of returning multiple values
-static void ParseShader(const std::string& filepath, std::string* outVertexSource, std::string* outFragmentSource)
-// static void ParseShader(const std::string& filepath, std::string& vertexSource, std::string& fragmentSource)
-// static std::string*
-// static std::array<std::string, 2>  -- created on stack (faster)
-// static std::vector<std::string>    -- created on heap
+// Tmemplates in c++
+// get compiler write code for you, based on set of rules
 
-// std::tuple<std::string, std::string> 
-// static std::pair<std::string, std::string>
-
+template<typename T>
+void Print(T value)
 {
-	std::ifstream stream(filepath);
-	std::string line;
-	std::stringstream ss[2];
-
-	enum class ShaderType {
-		NONE = -1, VERTEX = 0, FRAGMENT = 1
-	};
-
-	ShaderType type = ShaderType::NONE;
-	while (getline(stream, line)) {
-		if (line.find("#shader") != std::string::npos) {
-			if (line.find("vertex") != std::string::npos)
-				type = ShaderType::VERTEX;
-			else if (line.find("fragment") != std::string::npos)
-				type = ShaderType::FRAGMENT;
-		}
-		else {
-			ss[(int)type] << line << '\n';
-		}
-	}
-
-	std::string vs = ss[0].str();
-	std::string fs = ss[1].str();
-
-	if (outVertexSource) *outVertexSource = vs;
-
-	// vertexSource = vs;
-	// fragmentSource = fs;
-
-	// heap allocating
-	// return new std::string[]{ vs, fs };
-
-	// using std::array
-	// return std::array<std::string, 2>(vs, fs);
-
-	// return std::make_pair(vs, fs);
-}
+	std::cout << value << std::endl;
+} 
 
 int main()
 {
-	std::string vs, fs;
-	// ParseShader("filepath", vs, fs);
-	ParseShader("filepath", &vs, &fs);
+	// based on the type of the argument, compiler will generate a function
+	// if the Print function is not used, the compiler will not generate a function
+	Print(5);
+	Print("Hello");
+	Print(5.5f);
 
-	// using heap allocating
-	// std::string* sources = ParseShader("filepath");
+	Array<std::string, 50> array;
+	std::cout << array.GetSize() << std::endl;
 
-	
+	std::cin.get();
 }
