@@ -1,73 +1,31 @@
 #include <iostream>
-#include <string>
-#include <vector>
-#include <unordered_map>
+#include <array>
 
-// Auto keyword
-// If I have auto, do I really need to every write any types ? 
-// comes end to matter of style.
-
-// server side 
-std::string GetName() {}
-
-class Device {};
-
-class DeviceManager
+void PrintArray(int* array, unsigned int size)
 {
-private:
-	std::unordered_map<std::string, std::vector<Device*>> m_Devices;
-public:
-	const std::unordered_map<std::string, std::vector<Device*>>& GetDevices() const
-	{
-		return m_Devices;
-	}
-};
-
-// C++14
-auto GetName2()
-{
-	return "Cherno";
+	for (int i = 0; i < size; i++) {}
 }
 
-// C++11
-auto GetName3() -> const char*
+void PrintArray(std::array<int, 5>& array)
 {
-	return "Cherno";
-}
+	for (int i = 0; i < array.size(); i++) {}
+} 
 
 int main()
 {
-	// std::string name = GetName();
-	// in client side, code remains the same
-	// but this could be a bad thing, because the api can change
-	
-	// for these cases recommand not to use auto
-	auto name = GetName();
-	name.size();
+	// why you should use std::array instead of C-style arrays
+	// what is advantange?
+	std::array<int, 5> data; // stack
+	data[0] = 2;
+	data[4] = 1;
 
-	// In this case, auto is useful
-	std::vector<std::string> strings;
-	strings.push_back("Apple");
-	strings.push_back("Orange");
+	int dataOld[5]; // stack
+	dataOld[0] = 0;
 
+	// can also use std algorithm with the class
+	// std::sort(data.begin(), data.end());
 
-	// iterator is not used in c++11
-	// for (std::vector<std::string>::iterator it = strings.begin(); it != strings.end(); it++)
-	for (auto it = strings.begin(); it != strings.end(); it++)
-	{
-		std::cout << *it << std::endl;
-	}
-
-	using DeviceMap = std::unordered_map<std::string, std::vector<Device*>>;
-	// typedef std::unordered_map<std::string, std::vector<Device*>> DeviceMap;
-	
-	DeviceManager dm;
-	const DeviceMap& devices = dm.GetDevices();
-	// keep in mind that we have to use reference here (not to make a copy)
-	const auto& devices2 = dm.GetDevices();
-
-	// auto keywords also used in trailing return types,
-	// also can use function decide ruturn type
+	// and also in debug mode, and it would do bounds checking
 	
 	std::cin.get();
 }
