@@ -1,24 +1,44 @@
 #include <iostream>
-#include <vector>
-#include <algorithm>
-#include <functional>
 
-// sorting
+// Type Punning : get that type as pointer and cast it to another type of pointer and dereference it
+
+// more practical example
+struct Entity
+{
+	int x, y;
+
+	int* GetPositions()
+	{
+		return &x;
+	}
+};
 
 int main()
 {
-	std::vector<int> values = { 3, 5, 1, 4, 2 };
-	std::sort(values.begin(), values.end()); // using operator <. ascending order
-	std::sort(values.begin(), values.end(), std::greater<int>()); // descending order
-	std::sort(values.begin(), values.end(), [](int a, int b) 
-	{ 
-		if( a == 1 )
-			return false; 
-		if (b == 1)
-			return true; // move a to the front
+	int a = 50;
+	double value = (double)a; 
+	std::cout << value << std::endl;
 
-		return a < b; 
-	}); 
+	// Type Punning integer into double
+	// convert int pointer to double pointer and dereference it
+	// this going to look 4 bytes pass of integer and write that memory
+	double value2 = *(double*)&a;
+	double& value3 = *(double*)&a;
+	value2 = 0.0; // can cause crash
+
+	Entity e = { 5, 8 };
+	int* position = (int*)&e;
+	std::cout << position[0] << ", " << position[1] << std::endl;
 	
+	int y = *(int*)((char*)&e + 4); // char is 1 byte, so 4 bytes pass of x is y
+	std::cout << y << std::endl;
+
+	// it can be useful if you don't want to deal with copying or conversions
+	// if you don't like dealing raw cast, can use reinterpret_cast (same thing)
+	{
+		int* position = e.GetPositions();
+		position[0] = 2;
+	}
+
 	std::cin.get();
 }
