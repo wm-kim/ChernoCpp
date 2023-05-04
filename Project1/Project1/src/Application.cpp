@@ -1,55 +1,37 @@
 #include <iostream>
-#include <chrono>
-#include <thread>
 
-struct Timer
-{
-	std::chrono::time_point<std::chrono::steady_clock> start, end;
-	std::chrono::duration<float> duration;
-
-	Timer()
-	{
-		auto start = std::chrono::high_resolution_clock::now();
-	}
-
-	~Timer()
-	{
-		auto end = std::chrono::high_resolution_clock::now();
-		duration = end - start;
-
-		float ms = duration.count() * 1000.0f;
-		std::cout << "Timer took " << ms << "ms" << std::endl;
-	}
-};
-
-void Function()
-{
-	Timer timer;
-	
-	for (int i = 0; i < 100; i++)
-	{
-		// std::endl; can be slow
-		//	std::cout << "Hello " << i << std::endl;
-		std::cout << "Hello\n";;
-	}
-}
-
-// platform independent c++ stl way of figuring out how much time passes
-// can be used for building profiling tools
+// multidemensional array
 
 int main()
 {
-	using namespace std::chrono_literals;
+	int* array = new int[5];
+	
+	// 2D array
+	// can cause a memory fragmentation 
+	// instead of having one continous buffer, thsi will create 5 seperate buffers
+	// have to jump into different memory locations to get to the next row ( a lot slower )
+	// can optimize memory accessing when you have a continous buffer
+	// avoid 2d arrays if possible
 
-	auto start = std::chrono::high_resolution_clock::now();
-	// pause execution for 1 second
-	std::this_thread::sleep_for(1s);
-	auto end = std::chrono::high_resolution_clock::now();
+	int** a2d = new int* [5];
+	for (int i = 0; i < 5; i++)
+		a2d[i] = new int[5];
 
-	std::chrono::duration<float> duration = end - start;
-	std::cout << "Duration: " << duration.count() << "s" << std::endl;
+	a2d[0][0] = 0;
+	a2d[0][1] = 0;
+	a2d[0][2] = 0;
 
-	Function();
+	// this will just delete the array of pointers
+	// delete[] a2d;
 
+	for (int i = 0; i < 5; i++)
+		delete[] a2d[i];
+	delete[] a2d;
+
+	int* array2 = new int[5 * 5];
+	for (int y = 0; y < 5; y++)
+		for (int x = 0; x < 5; x++)
+			array2[x + y * 5] = 2;
+	
 	std::cin.get();
 }
