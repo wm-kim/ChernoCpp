@@ -1,35 +1,55 @@
 #include <iostream>
+#include <chrono>
 #include <thread>
 
-
-// primary purpose of thread is optimization
-
-static bool s_Finished = false;
-
-void DoWork()
+struct Timer
 {
-	using namespace std::literals::chrono_literals;
+	std::chrono::time_point<std::chrono::steady_clock> start, end;
+	std::chrono::duration<float> duration;
 
-	std::cout << "Started thread id=" << std::this_thread::get_id() << std::endl;
-
-	while (!s_Finished)
+	Timer()
 	{
-		std::cout << "Working...\n";
-		std::this_thread::sleep_for(1s);
+		auto start = std::chrono::high_resolution_clock::now();
+	}
+
+	~Timer()
+	{
+		auto end = std::chrono::high_resolution_clock::now();
+		duration = end - start;
+
+		float ms = duration.count() * 1000.0f;
+		std::cout << "Timer took " << ms << "ms" << std::endl;
+	}
+};
+
+void Function()
+{
+	Timer timer;
+	
+	for (int i = 0; i < 100; i++)
+	{
+		// std::endl; can be slow
+		//	std::cout << "Hello " << i << std::endl;
+		std::cout << "Hello\n";;
 	}
 }
 
+// platform independent c++ stl way of figuring out how much time passes
+// can be used for building profiling tools
+
 int main()
 {
-	std::thread worker(DoWork);
+	using namespace std::chrono_literals;
 
-	std::cin.get();
-	s_Finished = true;
+	auto start = std::chrono::high_resolution_clock::now();
+	// pause execution for 1 second
+	std::this_thread::sleep_for(1s);
+	auto end = std::chrono::high_resolution_clock::now();
 
-	// wait on current thread for worker thread to finish
-	worker.join();
-	std::cout << "Finished." << std::endl;
-	std::cout << "Started thread id=" << std::this_thread::get_id() << std::endl;
+	std::chrono::duration<float> duration = end - start;
+	std::cout << "Duration: " << duration.count() << "s" << std::endl;
+
+	Function();
 
 	std::cin.get();
 }
