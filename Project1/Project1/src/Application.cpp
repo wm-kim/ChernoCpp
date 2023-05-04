@@ -1,79 +1,52 @@
 #include <iostream>
-#include <fstream>
+#include <variant>
+#include <string>
 #include <optional>
 
-// optional data in c++. simplify code and makes your code more readable
-
-std::string ReadFileAsString(const std::string& filepath, bool& outSuccess)
+// good to know what when wrong instead of saying data is not present
+std::optional<std::string> ReadFileAsString()
 {
-	std::ifstream stream(filepath);
-	if (stream)
-	{
-		std::string result;
-		// read file
-		stream.close();
-		outSuccess = true;
-		return result;
-	}
-
-	outSuccess = false;
-	return std::string();
-}
-
-std::optional<std::string> ReadFileAsString2(const std::string& filepath)
-{
-	std::ifstream stream(filepath);
-	if (stream)
-	{
-		std::string result;
-		// read file
-		stream.close();
-		return result;
-	}
-
 	return {};
 }
 
+enum class ErrorCode
+{
+	None = 0, NotFound = 1, NoAccess = 2
+};
+
+std::variant<std::string, ErrorCode> ReadFileAsString2()
+{
+	return {};
+}
+
+// std::variant 
+// allow us to not have to worry about the type of the data
+// list all the type it could be, and later decide which one it is
 
 int main()
 {
+	std::variant<std::string, int> data;
+	// union size is the size of the largest type
+	// but variant size is the size of all the types combined
+	// union is more efficent but variant is more type safe
+	
+	data = "Cherno";
+	std::cout << std::get<std::string>(data) << std::endl;
+	data.index(); // 0 
+	if (auto* value = std::get_if<std::string>(&data)) // returns a pointer to the data if it is a string, otherwise returns nullptr
 	{
-		std::string data = ReadFileAsString("data.txt");
-		if (!data.empty())
-			std::cout << "data: " << data << std::endl;
-		else
-			std::cout << "Could not read file" << std::endl;
+		std::string& v = *value;
 	}
-
+	else
 	{
-		bool fileOpenedSuccesfully;
-		std::string data = ReadFileAsString("data.txt", fileOpenedSuccesfully);
-		if (fileOpenedSuccesfully)
-		{
-			// do something with data
-		}
-		else
-		{
-			// handle error
-		}
-	}
 
-	{
-		std::optional<std::string> data = ReadFileAsString2("data.txt");
-		std::string value = data.value_or("Not present");
-		std::cout << value << std::endl;
- 
-		if (data.has_value()) // if(data) is also valid
-		{
-			// do something with data
-		}
-		else
-		{
-			// std::string& string = *data;
-			// data.value();
-			std::cout << "File could not be opened!" << std::endl;
-		}
 	}
-
+	
+	data = 2;
+	data.index(); // 1
+	 
+	std::cout << std::get<int>(data) << std::endl;
+	// std::cout << std::get<std::string>(data) << std::endl; - exception
+	
 	std::cin.get();
 }
