@@ -1,37 +1,24 @@
 #include <iostream>
+#include <vector>
+#include <algorithm>
+#include <functional>
 
-// multidemensional array
+// sorting
 
 int main()
 {
-	int* array = new int[5];
-	
-	// 2D array
-	// can cause a memory fragmentation 
-	// instead of having one continous buffer, thsi will create 5 seperate buffers
-	// have to jump into different memory locations to get to the next row ( a lot slower )
-	// can optimize memory accessing when you have a continous buffer
-	// avoid 2d arrays if possible
+	std::vector<int> values = { 3, 5, 1, 4, 2 };
+	std::sort(values.begin(), values.end()); // using operator <. ascending order
+	std::sort(values.begin(), values.end(), std::greater<int>()); // descending order
+	std::sort(values.begin(), values.end(), [](int a, int b) 
+	{ 
+		if( a == 1 )
+			return false; 
+		if (b == 1)
+			return true; // move a to the front
 
-	int** a2d = new int* [5];
-	for (int i = 0; i < 5; i++)
-		a2d[i] = new int[5];
-
-	a2d[0][0] = 0;
-	a2d[0][1] = 0;
-	a2d[0][2] = 0;
-
-	// this will just delete the array of pointers
-	// delete[] a2d;
-
-	for (int i = 0; i < 5; i++)
-		delete[] a2d[i];
-	delete[] a2d;
-
-	int* array2 = new int[5 * 5];
-	for (int y = 0; y < 5; y++)
-		for (int x = 0; x < 5; x++)
-			array2[x + y * 5] = 2;
+		return a < b; 
+	}); 
 	
 	std::cin.get();
 }
