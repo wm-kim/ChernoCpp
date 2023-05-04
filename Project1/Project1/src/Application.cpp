@@ -1,44 +1,70 @@
 #include <iostream>
 
-// Type Punning : get that type as pointer and cast it to another type of pointer and dereference it
+// Union can only have one member, closed linked to type punning
+// useful when you want different names for the same memory location
 
-// more practical example
-struct Entity
+struct Vector2
 {
-	int x, y;
-
-	int* GetPositions()
-	{
-		return &x;
-	}
+	float x, y;
 };
+
+struct Vector4
+{
+	union 
+	{
+		// anonymous struct
+		struct 
+		{
+			float x, y, z, w;
+		};
+		struct
+		{
+			// a is same memory location as x
+			// b is same memory location as y
+			Vector2 a, b;
+		};
+	};
+
+	// this creates whole object 
+	// Vector2 GetA() { return Vector2(); }
+
+	// Type punning
+	/*Vector2& GetA()
+	{
+		return *(Vector2*)&x;
+	}*/
+};
+
+void PrintVector2(const Vector2& vector)
+{
+	std::cout << vector.x << ", " << vector.y << std::endl;
+}
 
 int main()
 {
-	int a = 50;
-	double value = (double)a; 
-	std::cout << value << std::endl;
-
-	// Type Punning integer into double
-	// convert int pointer to double pointer and dereference it
-	// this going to look 4 bytes pass of integer and write that memory
-	double value2 = *(double*)&a;
-	double& value3 = *(double*)&a;
-	value2 = 0.0; // can cause crash
-
-	Entity e = { 5, 8 };
-	int* position = (int*)&e;
-	std::cout << position[0] << ", " << position[1] << std::endl;
-	
-	int y = *(int*)((char*)&e + 4); // char is 1 byte, so 4 bytes pass of x is y
-	std::cout << y << std::endl;
-
-	// it can be useful if you don't want to deal with copying or conversions
-	// if you don't like dealing raw cast, can use reinterpret_cast (same thing)
+	struct Union
 	{
-		int* position = e.GetPositions();
-		position[0] = 2;
-	}
+		union
+		{
+			float a;
+			int b;
+		};
+	};
 
+	Union u;
+	u.a = 2.0f;
+	std::cout << u.a << ", " << u.b << std::endl;
+
+	{
+		Vector4 vector = { 1.0f, 2.0f, 3.0f, 4.0f };
+		
+		PrintVector2(vector.a);
+		PrintVector2(vector.b);
+		vector.z = 500.0f;
+		std::cout << "-----------------" << std::endl;
+		PrintVector2(vector.a);
+		PrintVector2(vector.b);
+	}
+	
 	std::cin.get();
 }
