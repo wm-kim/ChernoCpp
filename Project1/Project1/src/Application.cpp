@@ -1,47 +1,78 @@
 #include <iostream>
+#include <memory>
+#include <chrono>
 
-// dynamic cast : its a tool more like a function, evaluate not in compile time but in run time
-// useful cases, and how to use dynamic cast
+#include <array>
 
-class Entity
+// when you trying to benchmarking do work that acutally needs to be done
+// compiler can optimize your code
+
+class Timer
 {
 public:
-	// having virtual function will make VTable of this class
-	virtual void PrintName() {}
-};
+	Timer()
+	{
+		m_StartTimePoint = std::chrono::high_resolution_clock::now();
+	}
+	~Timer()
+	{
+		Stop();
+	}
 
-class Player : public Entity
-{
-	 
-};
+	void Stop()
+	{
+		auto endTimePoint = std::chrono::high_resolution_clock::now();
 
-class Enemy : public Entity
-{
-
+		auto start = std::chrono::time_point_cast<std::chrono::microseconds>(m_StartTimePoint).time_since_epoch().count();
+		auto end = std::chrono::time_point_cast<std::chrono::microseconds>(endTimePoint).time_since_epoch().count();
+	
+		auto duration = end - start;
+		double ms = duration * 0.001;
+		
+		std::cout << duration << "us (" << ms << "ms)\n";
+	}	
+private:
+	std::chrono::time_point<std::chrono::high_resolution_clock> m_StartTimePoint;
 };
 
 int main()
 {
-	Player* player = new Player();
-	Entity* actuallyPlayer = player;
-	Entity* actuallyEnemy = new Enemy();
-	
-	// This is dangerous, since e1 is acutally Enemy
-	// If we trying to do with unique to player, that enemy doesn't have
-	// for example accessing data members that only player has, it will crash
-	Player* p = (Player*)actuallyEnemy;
+	int value = 0;
+	{
+		Timer timer;
+		for (int i = 0; i < 1000000; i++)
+			value += 2;
+	}
 
-	// dynamic cast, if cast is valid it will return pointer to player
-	// but if its not it will return null if it fails
-	// the operand of dynamic cast must have a polymorphic class
-	Player* p0 = dynamic_cast<Player*>(actuallyEnemy);
-	if (p0) {}
-	// in C# : if (p0 is Player) {}
-	
-	Player* p1 = dynamic_cast<Player*>(actuallyPlayer);
+	std::cout << value << std::endl;
 
-	// How is it know the player is actually player?
-	// stores RTTI (Run Time Type Information) a bit of overhead 
+	// compare performance of shared pointer vs unique pointer
+	struct Vector2 { float x, y; };
+
+	// compile and test in release mode because release will be shipped to the user
+	std::cout << "Make shared\n";
+	{
+		Timer timer;
+		std::array<std::shared_ptr<Vector2>, 1000> sharedPtrs;
+		for (int i = 0; i < sharedPtrs.size(); i++)
+			sharedPtrs[i] = std::make_shared<Vector2>();
+	}
+	
+	std::cout << "New Shared\n";
+	{
+		Timer timer;
+		std::array<std::shared_ptr<Vector2>, 1000> sharedPtrs;
+		for (int i = 0; i < sharedPtrs.size(); i++)
+			sharedPtrs[i] = std::shared_ptr<Vector2>(new Vector2());
+	}
+	
+	std::cout << "Make unique\n";
+	{
+		Timer timer;
+		std::array<std::unique_ptr<Vector2>, 1000> uniquePtrs;
+		for (int i = 0; i < uniquePtrs.size(); i++)
+			uniquePtrs[i] = std::make_unique<Vector2>();
+	}
 
 	std::cin.get();
 }
