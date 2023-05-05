@@ -1,26 +1,36 @@
 #include <iostream>
-#include <any>
+#include <future>
+#include <chrono>
 
-int main()
-{
-	std::any data;
-	data = 2;
-	data = "Cherno";
-	data = std::string("Cherno");
-	
-	// will get exception if we try to cast to wrong type
-	std::string& string = std::any_cast<std::string&>(data);
+// multhreading in c++ std::async
+// one of the hardest part of making run in parallel is trying to figure out dependency
+// send independant tasks to worker thread and have them asynchronously 
 
-	// can store any type while std::variant have to list all types
-	// the fact that std::variant requires to list out all types is a good thing - type safe
-	// variant is just typesafe union
+// However, you should also be cautious about potential issues 
+// like race conditions and deadlocks when working with concurrent programming.
 
-	// std::any is for small data types it just store as a union
-	// when we store a big data type it will dynamically allocate memory (more than 32 bytes)
-	// (not good performance)
-	// std::variant performs faster if you deal with larger data
-	
-	// when to use std::any? - bit of a useless
-	
-	std::cin.get();
+// C# has parallel for loop but c++ doesn't
+// Debug > window > parallel stacks
+
+// Define a simple function
+int compute_sum(int a, int b) {
+    std::this_thread::sleep_for(std::chrono::seconds(2)); // Simulate a time-consuming task
+    return a + b;
+}
+
+int main() {
+    // Start an asynchronous task to compute the sum
+    std::future<int> sum_future = std::async(std::launch::async, compute_sum, 5, 7);
+
+    // Do other tasks while waiting for the sum computation to complete
+    std::cout << "Performing other tasks..." << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::cout << "Still working on other tasks..." << std::endl;
+
+    // Wait for the sum computation to finish and get the result
+    // get method will block the calling thread until the result is available.
+    int sum = sum_future.get();
+    std::cout << "Sum: " << sum << std::endl;
+
+    return 0;
 }
