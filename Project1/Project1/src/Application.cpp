@@ -1,67 +1,57 @@
 #include <iostream>
+#include <string>
+#include <memory>
 
-/*
- Singleton is quite counter intuitive of OOP
- this doens't need to be class if you only have single instance of object
- with few data & few functions
+// How to Track memory allocation
+// Trace back in callstack where the memory allocation is coming from
+// VS has memory allcation tracking profile tools
 
- useful when we want to have functionality that applies to global set of data
- ex. random number generator, renderer, audio system, etc.
-
- almost use class as namespace. singleton class can just behave like namespaces
- there is nothing tied to the "Class"
-*/
-
-class Singleton
+// quick way to track memory allocation
+struct AllocationMatrics
 {
-public:
-	Singleton(const Singleton&) = delete;
-	static Singleton& Get()
-	{
-		return s_Instance;
-	}
-private:
-	Singleton() {}
-	static Singleton s_Instance; // - have to define in cpp file
+	uint32_t TotalAllocated = 0;
+	uint32_t TotalFreed = 0;
+
+	uint32_t CurrentUsage() { return TotalAllocated - TotalFreed; }
 };
 
-Singleton Singleton::s_Instance; // static member variable
+static AllocationMatrics s_AllocationMatrics;
 
-
-class Random
+void* operator new (size_t size)
 {
-public:
-	Random(const Random&) = delete;
-	static Random& Get()
-	{
-		static Random s_Instance; 
-		return s_Instance;
-	}
-	 // float Float() { return m_RandomGenerator; }
-	static float Float() { return Get().IFloat(); }
-private:
-	// internal float function
-	float IFloat() { return m_RandomGenerator; }
-	Random() {}
-	float m_RandomGenerator = 0.5f;
-};
-
-// can just have namespace but can lose functionality like assign instance to variable
-namespace RandomClass {
-	static float s_RandomGenerator = 0.5f;
-	static float Float() { return s_RandomGenerator; }
+	s_AllocationMatrics.TotalAllocated += size;
+	// std::cout << "Allocating " << size << " bytes\n";
+	// breakpoint here
+	return malloc(size);
 }
+
+void operator delete (void* memory, size_t size)
+{
+	s_AllocationMatrics.TotalFreed += size; 
+	// std::cout << "Freeing " << size << " bytes\n";
+	free(memory);
+}
+
+static void PrintMemoryUsage()
+{
+	std::cout << "Memory Usage: " << s_AllocationMatrics.CurrentUsage() << " bytes\n";
+}
+
+struct Object
+{
+	int x, y, z;
+};
 
 int main() 
 {
-	// creating another instance - delete copy constructor
-	Singleton instance = Singleton::Get();
-	// Singleton& instance = Singleton::Get();
-	
-	
-	// auto& random = Random::Get();
-	// float number = random.Float();
+	PrintMemoryUsage();
+	std::string string = "Cherno";
+	PrintMemoryUsage();
+	{
+		std::unique_ptr<Object> obj = std::make_unique<Object>();
+		PrintMemoryUsage();
+	}
+	PrintMemoryUsage();
 
-	float number = Random::Float();
 	std::cin.get();
 }
