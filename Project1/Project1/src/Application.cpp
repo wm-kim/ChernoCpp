@@ -1,36 +1,51 @@
 #include <iostream>
-#include <future>
-#include <chrono>
+#include <string>
 
-// multhreading in c++ std::async
-// one of the hardest part of making run in parallel is trying to figure out dependency
-// send independant tasks to worker thread and have them asynchronously 
+// std::strigview : a pointer to a string (const char*) + size
+// creating view of existing memory instead of allocate whole new memory
 
-// However, you should also be cautious about potential issues 
-// like race conditions and deadlocks when working with concurrent programming.
+#define STRING_VIEW 1
 
-// C# has parallel for loop but c++ doesn't
-// Debug > window > parallel stacks
+static uint32_t s_AllocCount = 0;
 
-// Define a simple function
-int compute_sum(int a, int b) {
-    std::this_thread::sleep_for(std::chrono::seconds(2)); // Simulate a time-consuming task
-    return a + b;
+// std::strings tends to allocate in the heap
+void* operator new(size_t size)
+{
+    s_AllocCount++;
+	std::cout << "Allocating " << size << " bytes\n";
+	return malloc(size);
 }
 
-int main() {
-    // Start an asynchronous task to compute the sum
-    std::future<int> sum_future = std::async(std::launch::async, compute_sum, 5, 7);
+# if STRING_VIEW
+void PrintName(std::string_view name)
+{
+	std::cout << name << std::endl;
+}
+# else
+void PrintName(const std::string& name)
+{
+	std::cout << name << std::endl;
+}
+# endif
 
-    // Do other tasks while waiting for the sum computation to complete
-    std::cout << "Performing other tasks..." << std::endl;
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    std::cout << "Still working on other tasks..." << std::endl;
+int main() 
+{
 
-    // Wait for the sum computation to finish and get the result
-    // get method will block the calling thread until the result is available.
-    int sum = sum_future.get();
-    std::cout << "Sum: " << sum << std::endl;
+	std::string name = "Yan Chernoikov"; // allocate 1 time
+	// const char* name = "Yan Chernoikov"; 
+	
+#if STRING_VIEW
+	std::string_view firstName(name.c_str(), 3);
+	std::string_view lastName(name.c_str() + 4, 9);
+#else 
+	// PrintName("Yan Chernoikov"); // allocate 1 time
+	std::string firstName = name.substr(0, 3);
+	std::string lastName = name.substr(4, 9);
+#endif
+	
+	PrintName(firstName);
+	PrintName(lastName);
 
-    return 0;
+	std::cout << "AllocCount: " << s_AllocCount << std::endl;
+	std::cin.get();
 }
