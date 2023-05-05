@@ -1,28 +1,19 @@
 #include <iostream>
 
-// lvalue & rvalue
+// Argument Evalution Order
 
-// lvalue reference taking lvalue unless its const
-void PrintName(const std::string& name)
+void PrintSum(int a, int b)
 {
-	std::cout << "[lvalue] " << name << std::endl;
-}
-
-// rvalue reference only taking rvalue
-// can steal the resources from the temporary value - help with optimization
-void PrintName(std::string&& name)
-{
-	std::cout << "[rvalue] " << name << std::endl;
+	std::cout << a << " + " << b << " = " << a + b << std::endl;
 }
 
 int main() 
 {
-	std::string firstName = "Yan";
-	std::string lastName = "Chernikov";
-
-	std::string fullname = firstName + lastName;
-
-	PrintName(firstName); // lvalue
-	PrintName(firstName + lastName); // rvalue
+	int value = 0;
+	// this is undefined behavior; up until c++17
+	// c++ standard does not specify, various on compiler
+	PrintSum(value++, value++); 
+	// in c++17 the postfix expression have to be evalution before each other expression
+	
 	std::cin.get();
 }
