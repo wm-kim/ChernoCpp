@@ -1,51 +1,67 @@
 #include <iostream>
-#include <string>
 
-// std::strigview : a pointer to a string (const char*) + size
-// creating view of existing memory instead of allocate whole new memory
+/*
+ Singleton is quite counter intuitive of OOP
+ this doens't need to be class if you only have single instance of object
+ with few data & few functions
 
-#define STRING_VIEW 1
+ useful when we want to have functionality that applies to global set of data
+ ex. random number generator, renderer, audio system, etc.
 
-static uint32_t s_AllocCount = 0;
+ almost use class as namespace. singleton class can just behave like namespaces
+ there is nothing tied to the "Class"
+*/
 
-// std::strings tends to allocate in the heap
-void* operator new(size_t size)
+class Singleton
 {
-    s_AllocCount++;
-	std::cout << "Allocating " << size << " bytes\n";
-	return malloc(size);
-}
+public:
+	Singleton(const Singleton&) = delete;
+	static Singleton& Get()
+	{
+		return s_Instance;
+	}
+private:
+	Singleton() {}
+	static Singleton s_Instance; // - have to define in cpp file
+};
 
-# if STRING_VIEW
-void PrintName(std::string_view name)
+Singleton Singleton::s_Instance; // static member variable
+
+
+class Random
 {
-	std::cout << name << std::endl;
+public:
+	Random(const Random&) = delete;
+	static Random& Get()
+	{
+		static Random s_Instance; 
+		return s_Instance;
+	}
+	 // float Float() { return m_RandomGenerator; }
+	static float Float() { return Get().IFloat(); }
+private:
+	// internal float function
+	float IFloat() { return m_RandomGenerator; }
+	Random() {}
+	float m_RandomGenerator = 0.5f;
+};
+
+// can just have namespace but can lose functionality like assign instance to variable
+namespace RandomClass {
+	static float s_RandomGenerator = 0.5f;
+	static float Float() { return s_RandomGenerator; }
 }
-# else
-void PrintName(const std::string& name)
-{
-	std::cout << name << std::endl;
-}
-# endif
 
 int main() 
 {
-
-	std::string name = "Yan Chernoikov"; // allocate 1 time
-	// const char* name = "Yan Chernoikov"; 
+	// creating another instance - delete copy constructor
+	Singleton instance = Singleton::Get();
+	// Singleton& instance = Singleton::Get();
 	
-#if STRING_VIEW
-	std::string_view firstName(name.c_str(), 3);
-	std::string_view lastName(name.c_str() + 4, 9);
-#else 
-	// PrintName("Yan Chernoikov"); // allocate 1 time
-	std::string firstName = name.substr(0, 3);
-	std::string lastName = name.substr(4, 9);
-#endif
 	
-	PrintName(firstName);
-	PrintName(lastName);
+	// auto& random = Random::Get();
+	// float number = random.Float();
 
-	std::cout << "AllocCount: " << s_AllocCount << std::endl;
+	float number = Random::Float();
 	std::cin.get();
 }
